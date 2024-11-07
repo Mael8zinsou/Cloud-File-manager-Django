@@ -1,0 +1,68 @@
+<!-- templates/auth_app/group_manager.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Inscription page for new users to sign up.">
+    <meta name="keywords" content="inscription, sign up, registration, user, form">
+    <title>Groupes de l'Utilisateur</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.extra_tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="container py-5">
+        <h1 class="text-center mb-5">My Groups</h1>
+        
+        <ul class="list-group">
+            {% for group in groups_with_users %}
+                <li class="list-group-item">
+                    <h5><i class="bx bx-group me-2"></i>{{ group.group.name }}</h5>
+                    <p class="text-muted">{{ group.users|length }} Members</p>
+                    <ul class="list-unstyled">
+                        {% for user in group.users %}
+                            <li class="d-flex justify-content-between align-items-center">
+                                <span>
+                                    <i class="bx bx-user me-2"></i>{{ user.username }}
+                                    {% if forloop.first %}
+                                        <span class="badge bg-primary rounded-pill">Admin </span>
+                                    {% endif %}
+                                </span>
+                                {% if not forloop.first %}
+                                    <form method="post" action="{% url 'auth_app:remove_members' user.id group.group.id %}" >
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger btn-sm mt-1">
+                                            <i class="bx bx-trash"></i> Delete
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </li>
+                        {% empty %}
+                            <li>No users in this group.</li>
+                        {% endfor %}
+                    </ul>
+                    
+                </li>
+            {% empty %}
+                <li class="list-group-item">No groups found.</li>
+            {% endfor %}
+        </ul>
+        
+        <div class="text-center mt-4">
+            <a href="{% url 'home_app:folder_list' %}" class="btn btn-second">Back to Home</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

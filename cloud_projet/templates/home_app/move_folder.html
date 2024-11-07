@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Move folder to a different parent folder">
+    <meta name="keywords" content="move, folder, parent folder">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <title>Move Folder</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style_move_folder.css' %}"> <!-- Adjust the path to your CSS file if needed -->
+</head>
+<body>
+    <div class="container">
+        <h2>Move {{ folder.name }}</h2>
+        <form method="post">
+            {% csrf_token %}
+            <label for="new_parent_folder_id">Select new parent folder:</label>
+            <select name="new_parent_folder_id" id="new_parent_folder_id">
+                {% for folder in folders %}
+                    <option value="{{ folder.id }}">{{ folder.name }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit">Move</button>
+        </form>
+
+        <div class="card-body">
+            <ul class="list-group list-group-flush mt-5">
+                <div class="d-grid">
+            
+                    <a href="{% url 'home_app:folder_list' %}" class="btn btn-second">Back to Home</a>
+                    
+                </div>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

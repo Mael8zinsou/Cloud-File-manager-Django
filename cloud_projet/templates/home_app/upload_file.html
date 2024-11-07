@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Inscription page for new users to sign up.">
+    <meta name="keywords" content="inscription, sign up, registration, user, form">
+
+    <title>Upload File</title>
+</head>
+<body>
+    <h1>Upload File</h1>
+    <form method="post" enctype="multipart/form-data">
+
+        {% csrf_token %}
+        <input type="file" name="file">
+        {{ form.as_p }}
+        
+        <button type="submit">Upload</button>
+    </form>
+</body>
+</html>

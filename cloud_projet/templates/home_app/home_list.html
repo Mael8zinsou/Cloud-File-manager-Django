@@ -1,0 +1,551 @@
+{% load static %}
+{% load files_tags %}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Ceci est une description de ma page web.">
+    <meta name="keywords" content="web, page, section, contenu">
+    <title>Ma Page Web</title>
+
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css" rel="stylesheet"> -->
+    
+    {% comment %} <link href="https://cdn.lineicons.com/3.0/lineicons.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/boxicons@2.0.7/css/boxicons.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/5.3.45/css/materialdesignicons.css" integrity="sha256-NAxhqDvtY0l4xn+YVa6WjAcmd94NNfttjNsDmNatFVc=" crossorigin="anonymous" />
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'> {% endcomment %}
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/5.3.45/css/materialdesignicons.css" integrity="sha256-NAxhqDvtY0l4xn+YVa6WjAcmd94NNfttjNsDmNatFVc=" crossorigin="anonymous" />
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+
+    <link rel="stylesheet" href="{% static 'css/style_home_list.css' %}">
+</head>
+<body>
+    
+    <header>
+        <!-- <h1>Bienvenue sur ma page web</h1>
+        <nav>
+            <ul>
+                <li><a href="#section1">Section 1</a></li>
+                <li><a href="#section3">Section 3</a></li>
+            </ul>
+        </nav> -->
+    </header>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.extra_tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="container">
+        <div class="row">
+            <div class="col-12 col-lg-3">
+
+                <div class="card">
+                    <div class="card-body">
+
+                        <div class="row">
+
+                            <div class="col">
+                                <!-- <a href="javascript:;" class="btn btn-primary">+ Add File</a> -->
+                                <a href="{% if current_folder.id and current_group.id %}{% url 'home_app:group_create_folder_with_id' current_group.id current_folder.id %}{% elif current_folder.id %}{% url 'home_app:create_folder_with_id' current_folder.id %}{% elif current_group.id %}{% url 'home_app:group_create_folder' current_group.id %}{% else %}{% url 'home_app:create_folder' %}{% endif %}" class="btn btn-primary">+ Add Folder</a>
+                            </div>
+
+                            <div class="col">
+                                <form action="{% if current_group.id and current_folder.id %} {% url 'home_app:group_list_with_id' current_group.id current_folder.id %} {% elif current_group.id %} {% url 'home_app:group_list' current_group.id %} {% elif current_folder.id %} {% url 'home_app:folder_list_with_id' current_folder.id %} {% else %} {% url 'home_app:folder_list' %} {% endif %}" method="post" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    <label class="btn btn-primary">
+                                        Upload File <input type="file" name="file" hidden onchange="this.form.submit()">
+                                    </label>
+                                </form>
+                            </div>
+                        </div>
+                    
+
+                        <h5 class="my-3">My Drive</h5>
+
+                        <div class="fm-menu">
+                            <div class="list-group list-group-flush"> 
+                                <a href="{% url 'home_app:folder_list' %}" class="list-group-item py-1"><i class="bx bx-folder me-2"></i><span class="bs">All Files</span></a>
+                                <a href="{% url 'auth_app:group_manager' %}" class="list-group-item py-1"><i class="bx bx-group me-2"></i><span class="bs">Group Manager</span></a>
+                                <a href="javascript:;" id="stats-link" class="list-group-item py-1">
+                                    <i class="bx bx-stats me-2"></i><span class="bs">Stats</span>
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Chart Container -->
+                <div class="card-body">
+                    <div id="stats-chart" style="display: none;">
+                        <h5 class="mb-0 text-primary font-weight-bold">Storage Distribution</h5>
+                        <canvas id="storageChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+
+                    <div class="card-body">
+                        <h5 class="mb-0 text-primary font-weight-bold"> {{ total_size.formatted_total }} <span class="float-end text-secondary">100 Mo</span></h5>
+                        <p class="mb-0 mt-2"><span class="text-primary">Memort Used  </span><span class="float-end text-secondary">Total Memory</span></p>
+
+                        <div class="progress mt-3" style="height:7px;">
+                            <div class="progress-bar" role="progressbar" style="width: {{ total_size.percentages.Images }}%" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ total_size.percentages.Documents }}%" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress-bar bg-danger" role="progressbar" style="width: {{ total_size.percentages.Media }}%" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress-bar bg-warning" role="progressbar" style="width: {{ total_size.percentages.Others }}%" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+
+                        <div class="mt-3"></div>
+
+                        {% comment %} {% for total in totals %} {% endcomment %}
+
+                        {% if size.Images %}
+                        <div class="d-flex align-items-center">
+                            <div class="fm-file-box bg-light-primary text-primary"><i class="bx bx-image"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-2 ml-2">
+                                <h6 class="mb-0">Images</h6>
+                                <p class="mb-0 text-secondary"> {{ size.Images.count }} Files</p>
+                            </div>
+                            <h6 class="text-primary mb-0"> {{ size.Images.total_size }} </h6>
+                            
+                        </div>
+
+                        {% else %}
+
+                        <div class="d-flex align-items-center">
+                            <div class="fm-file-box bg-light-primary text-primary"><i class="bx bx-image"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-2 ml-2">
+                                <h6 class="mb-0">Images</h6>
+                                <p class="mb-0 text-secondary"> 0 Files</p>
+                            </div>
+                            <h6 class="text-primary mb-0">0 Mo</h6>
+                            
+                        </div>
+
+                        {% endif %}
+
+                        {% if size.Documents %}
+                        <div class="d-flex align-items-center mt-3">
+                            <div class="fm-file-box bg-light-success text-success"><i class="bx bxs-file-doc"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-2  ml-2">
+                                <h6 class="mb-0">Documents</h6>
+                                <p class="mb-0 text-secondary"> {{ size.Documents.count }} Files</p>
+                            </div>
+                            <h6 class="text-primary mb-0">{{ size.Documents.total_size }}</h6>
+                        </div>
+
+                        {% else %}
+
+                        <div class="d-flex align-items-center mt-3">
+                            <div class="fm-file-box bg-light-success text-success"><i class="bx bxs-file-doc"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-2  ml-2">
+                                <h6 class="mb-0">Documents</h6>
+                                <p class="mb-0 text-secondary">0 files</p>
+                            </div>
+                            <h6 class="text-primary mb-0">0 Mo</h6>
+                        </div>
+
+                        {% endif %}
+                        
+                        {% if size.Media %}
+                        <div class="d-flex align-items-center mt-3">
+                            <div class="fm-file-box bg-light-danger text-danger"><i class="bx bx-video"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-2  ml-2">
+                                <h6 class="mb-0">Media Files</h6>
+                                <p class="mb-0 text-secondary">{{ size.Media.count }} files</p>
+                            </div>
+                            <h6 class="text-primary mb-0">{{ size.Media.total_size }}</h6>
+                        </div>
+                        {% else %}
+                        <div class="d-flex align-items-center mt-3">
+                            <div class="fm-file-box bg-light-danger text-danger"><i class="bx bx-video"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-2  ml-2">
+                                <h6 class="mb-0">Media Files</h6>
+                                <p class="mb-0 text-secondary"> 0 files</p>
+                            </div>
+                            <h6 class="text-primary mb-0">0 Mo</h6>
+                        </div>
+                        {% endif %}
+
+                        {% if size.Others %}
+
+                        <div class="d-flex align-items-center mt-3">
+                            <div class="fm-file-box bg-light-warning text-warning"><i class="bx bx-image"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-2  ml-2">
+                                <h6 class="mb-0">Other Files</h6>
+                                <p class="mb-0 text-secondary"> {{ size.Others.count }} Files</p>
+                            </div>
+                            <h6 class="text-primary mb-0"> {{ size.Others.total_size }}</h6>
+                        </div>
+
+                        {% else %}
+
+                        <div class="d-flex align-items-center mt-3">
+                            <div class="fm-file-box bg-light-warning text-warning"><i class="bx bx-image"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-2  ml-2">
+                                <h6 class="mb-0">Other Files</h6>
+                                <p class="mb-0 text-secondary">0 Files</p>
+                            </div>
+                            <h6 class="text-primary mb-0">0 Mo</h6>
+                        </div>
+
+                        {% endif %}
+
+                        {% comment %} {% endfor %} {% endcomment %}
+                    </div>
+
+                </div>
+
+                <!--  List Group -->
+                <div class="card">
+                    <div class="card-body">
+
+                        <div class="row">
+                        </div>
+
+                        <h5 class="my-3">List Group</h5>
+
+                        <div class="fm-group">
+                            <div class="list-group list-group-flush"> 
+                                {% comment %} {% if groups_owner %}
+                                    {% for group in groups_owner %}
+                                        <a href="#" class="list-group-item py-1">
+                                            <i class="bx bx-group me-2"></i><span class="bs">{{ group.name }}</span>
+                                        </a>
+                                    {% endfor %}
+                                {% endif %} {% endcomment %}
+                                {% if user_memberships %}
+                                    {% for memberships in user_memberships %}
+                                        {% comment %} <a href="{% if current_folder.id %} {% url 'home_app:group_list_with_id' memberships.group.id current_folder.id %} {% else %} {% url 'home_app:group_list' memberships.group.id %} {% endif %}" class="list-group-item py-1"> {% endcomment %}
+                                            <a href="{% url 'home_app:group_list' memberships.group.id %} " class="list-group-item py-1">
+                                            <i class="bx bx-group me-2"></i><span class="bs">{{ memberships.group.name }}</span>
+                                        </a>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <a href="{% url 'auth_app:create_group' %}" class="btn btn-primary mt-3 d-block mx-auto">+ Add Group</a>
+                        <a href="{% url 'auth_app:add_members' %}" class="btn btn-primary mt-3 d-block mx-auto">+ Add Members</a>
+
+                    </div>
+                </div>
+                
+            </div>
+
+            <!-- Base pour affichage des dossiers --> 
+
+            <div class="col-12 col-lg-9">
+                <div class="card">
+                    <div class="card-body">
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb mb-0">
+                                    {% if current_group %}
+                                        <li class="breadcrumb-item"><a href="{% url 'home_app:group_list' current_group.id %}">Group Home</a></li>
+                                    {% else %}
+                                        <li class="breadcrumb-item">Home</li>
+                                    {% endif %}
+                                    {% if current_folder %}
+                                        {% for folder in parent_fold %}
+                                            <li class="breadcrumb-item">
+                                                {% if current_group %}
+                                                    <a href="{% url 'home_app:group_list_with_id' current_group.id folder.id %}">{{ folder.name }}</a>
+                                                {% else %}
+                                                    <a href="{% url 'home_app:folder_list_with_id' folder.id %}">{{ folder.name }}</a>
+                                                {% endif %}
+                                            </li>
+                                        {% endfor %}
+                                        <li class="breadcrumb-item active" aria-current="page">{{ current_folder.name }}</li>
+                                    {% else %}
+                                        <li class="breadcrumb-item active" aria-current="page">
+                                            {% if current_group %}
+                                                Group Home
+                                            {% else %}
+                                                Home
+                                            {% endif %}
+                                        </li>
+                                    {% endif %}
+                                </ol>
+                            </nav>
+
+                            
+
+                            <a href="{% url 'auth_app:deconnexion' %}" class="btn btn-primary">Log out</a>
+
+                        </div>
+
+                        <div class="d-flex justify-content-end align-items-center mb-3">
+                            <h5 class="font-size-16 mb-0 me-auto">Folders</h5>
+                            <h5 class="font-size-16 me-3 mb-0">Hello, {{ user.username }} !</h5>
+                        </div>
+
+                        <div class="row mt-4">
+                            <!-- debut dossier -->
+                            <!-- Div qui sera dans une boucle for juste en dessous --> 
+                            {% if folders %}
+
+                            {% for folder in folders %}
+                            <div class="col-xl-6 col-sm-6">
+                                <div class="card shadow-none border">
+                                    <div class="card-body p-3">
+
+                                        <div class="d-flex justify-content-between align-items-center">
+
+                                            <!-- Image dossier --> 
+                                            <div>
+                                                <i class="bx bxs-folder h1 mb-0 text-warning"></i>
+                                            </div>
+
+                                            <!-- Owner and menu aligned side by side -->
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-3">
+                                                    <p class="mb-0">Owner: {{ folder.owner.username }}</p>
+                                                </div>
+
+                                                <!-- Menu pour dossier -->
+                                                <div class="dropdown">
+                                                    <a class="font-size-16 text-muted" role="button" data-bs-toggle="dropdown" aria-haspopup="true">
+                                                        <i class="mdi mdi-dots-vertical"></i>
+                                                    </a>
+                                                    
+                                                    <div class="dropdown-menu dropdown-menu-end">
+                                                        <a class="dropdown-item" href="{% if current_group.id %} {% url 'home_app:move_folder_group' current_group.id folder.id %} {% else %} {% url 'home_app:move_folder' folder.id %} {% endif %}">Move</a>
+                                                        <a class="dropdown-item" href="{% if current_group.id %} {% url 'home_app:copy_folder_group' current_group.id folder.id %} {% else %} {% url 'home_app:copy_folder' folder.id %} {% endif %}">Copy</a>
+                                                        <a class="dropdown-item" href="{% if current_group.id %} {% url 'home_app:delete_folders' current_group.id folder.id %} {% else %} {% url 'home_app:delete_folders_user' folder.id %} {% endif %}">Remove</a>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                        <div class="d-flex mt-3">
+                                            <!-- Nom du dossier a mettre ainsi que le nombre de sous dossiers --> 
+                                            <div class="overflow-hidden me-auto">
+                                                <h5 class="font-size-15 text-truncate mb-1">
+                                                    {% if current_group.id %}
+                                                        <a href="{% url 'home_app:group_list_with_id' current_group.id folder.id %}" class="text-body">{{ folder.name }}</a>
+                                                    {% else %}
+                                                        <a href="{% url 'home_app:folder_list_with_id' folder.id %}" class="text-body">{{ folder.name }}</a>
+                                                    {% endif %}
+                                                </h5>
+                                                <p class="text-muted text-truncate mb-0">{{ folder.subfolders.count }} subfolders and {{ folder.files.count }} files</p>
+                                            </div>
+                                            <!-- Date de création  --> 
+                                            <div class="align-self-end ms-2">
+                                                <p class="text-muted mb-0 font-size-13"><i class="mdi mdi-clock"></i> {{ folder.created_at }} </p>
+                                            </div>
+                                            
+                                        </div>
+
+                                        <!-- </div> -->
+
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Fin Dossier -->
+                            {% endfor %}
+
+                            {% endif %}
+                        </div>
+
+                        {% if not folders %}
+                            <div class="d-flex justify-content-center align-items-center mt-2">
+                                Il n'y a pas de dossier. Créez un nouveau.
+                            </div>
+                        {% endif %}
+                        
+                        <!--  Files -->
+                        <h5 class="font-size-16 me- ml-2">Files</h5>
+                        <hr class="mt-2">
+
+                        <!-- Contenu Table pour fichiers -->
+                        <div class="table-responsive min-height-200">
+                            <table class="table align-middle table-nowrap table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Date created</th>
+                                    <th scope="col">Size</th>
+                                    <th scope="col" colspan="2">Owners</th>
+                                    </tr>
+                                </thead>
+    
+                                <tbody>
+                                    <!-- La boucle de fichier début ici -->
+                                    {% if files %}
+
+                                    {% for file in files %}
+                                    <tr>
+                                        <td><i class="mdi {{ file.extension_file.lower|mdi_class }} font-size-16 align-middle text-primary me-2"></i> {{ file.name }}</td>
+                                        <td>{{ file.created_at }}</td>
+                                        <td>{{ file.formatted_size }}</td>
+                                        <td>{{ file.owner.username }}</td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <a class="font-size-16 text-muted" role="button" data-bs-toggle="dropdown" aria-haspopup="true">
+                                                    <i class="mdi mdi-dots-horizontal"></i>
+                                                </a>
+                                                
+                                                <div class="dropdown-menu dropdown-menu-end">
+                                                    <a class="dropdown-item" href="{% if current_group.id %} {% url 'home_app:move_file_group' current_group.id file.id %} {% else %} {% url 'home_app:move_file' file.id %} {% endif %}">Move</a>
+                                                    <a class="dropdown-item" href="{% if current_group.id %} {% url 'home_app:copy_file_group' current_group.id file.id %} {% else %} {% url 'home_app:copy_file' file.id %} {% endif %}">Copy</a>
+                                                    <a href="#" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#file-{{ file.id }}">View</a>
+                                                    <a class="dropdown-item" href="{% if current_group.id %} {% url 'home_app:delete_file' current_group.id file.id %} {% else %} {% url 'home_app:delete_file_user' file.id %} {% endif %}">Remove</a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Debut Modal -->
+                                    <div class="modal fade" id="file-{{ file.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="file-{{ file.id }}Label" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                            <div class="modal-content">
+
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="staticBackdropLabel">{{ file.name }}</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+
+                                                <div class="modal-body">
+                                                    {% if file.extension_file.lower in ".jpg .png .gif" %}
+                                                        <img class="img-fluid" width="100%" height="auto" src="{% if current_group.id %} {% url 'home_app:view_file_group' current_group.id file.id %} {% else %} {% url 'home_app:view_file' file.id %} {% endif %}" alt="No display">
+                                    
+                                                    {% elif file.extension_file.lower in ".txt .pdf .html" %}
+                                                        <iframe src="{% if current_group.id %}{% url 'home_app:view_file_group' current_group.id file.id %}{% else %}{% url 'home_app:view_file' file.id %}{% endif %}" width="100%" height="700px"></iframe>
+                                                    {% elif file.extension_file.lower in ".mp4" %}
+                                                        <video width="100%" height="auto" controls>
+                                                            <source src="{% if current_group.id %} {% url 'home_app:view_file_group' current_group.id file.id %} {% else %} {% url 'home_app:view_file' file.id %} {% endif %}" type="video/mp4">
+                                                        </video>
+                                                    {% endif %}
+                                                </div>
+
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Fin Modal -->
+
+                                    {% endfor %}
+
+                                    {% endif %}
+        
+                                    <!-- S'arrete ici -->
+
+
+                                </tbody>
+    
+                            </table>
+
+                            {% if not files %}
+                            <tr>
+                                <div class="d-flex justify-content-center align-items-center mt-5">
+                                    Il n'y a pas de fichier pour le dossier cliqué. Téleverser un nouveau.
+                                </div>
+                            </tr>
+                            {% endif %}
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+  
+    
+    <!-- <footer>
+        <p>&copy; 2024 Group 10</p>
+    </footer> -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const statsLink = document.getElementById('stats-link');
+            const statsChart = document.getElementById('stats-chart');
+        
+            statsLink.addEventListener('click', function() {
+                if (statsChart.style.display === 'none') {
+                    statsChart.style.display = 'block';
+                } else {
+                    statsChart.style.display = 'none';
+                }
+            });
+        
+            const ctx = document.getElementById('storageChart').getContext('2d');
+            const storageData = {
+                'Images': {{ total_size.percentages.Images|default:0 }},
+                'Documents': {{ total_size.percentages.Documents|default:0 }},
+                'Media': {{ total_size.percentages.Media|default:0 }},
+                'Others': {{ total_size.percentages.Others|default:0 }}
+            };
+        
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(storageData),
+                    datasets: [{
+                        data: Object.values(storageData),
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.8)',  // Blue for Images
+                            'rgba(75, 192, 192, 0.8)',  // Green for Documents
+                            'rgba(255, 99, 132, 0.8)',  // Red for Media
+                            'rgba(255, 206, 86, 0.8)',  // Yellow for Others
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Storage Usage Distribution'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.raw.toFixed(1)}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+{% load static %} 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Inscription page for new users to sign up.">
+    <meta name="keywords" content="inscription, sign up, registration, user, form">
+
+    <title>Connexion</title>
+
+    <link rel="stylesheet" href="{% static 'css/style_connexion.css' %}">
+</head>
+<body>
+    <div class="container">
+        <div class="form">
+            <h1>Connexion</h1>
+
+            {% if messages %}   <!-- Affichage des messages d'erreur incorrect -->
+            <div class="error-messages">
+                {% for message in messages %}
+                <p class="error">{{ message }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'auth_app:connexion' %}">
+                {% csrf_token %}
+                <label for="username">Username</label>
+                <input type="text" name="username" required>
+                <label for="password">Password</label>
+                <input type="password" name="password" required>
+                <button type="submit">Login</button>
+            </form>
+            <p class="link">Not registered yet ? <a href="{% url 'auth_app:inscription' %}">Sign up</a></p>
+        </div>
+    </div>
+</body>
+</html>

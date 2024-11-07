@@ -1,0 +1,31 @@
+{% load static %}   {% comment %}  Permet de charger des fichiers static (css, js){% endcomment %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Inscription page for new users to sign up.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="keywords" content="inscription, sign up, registration, user, form">
+
+    <title>Inscription</title>
+
+    <link rel="stylesheet" href="{% static 'css/style_inscription.css' %}">
+    
+</head>
+<body>
+    <div class="container">
+        <div class="container">
+            <div class="form">
+                <form method="post" action="{% url 'auth_app:inscription' %}">
+                    {% csrf_token %} <!-- C'est une balise Django qui ajoute un jeton de sécurité -->
+                    <h1>Inscription</h1>
+                    {{ form.as_p }}    
+                    <button type="submit">Sign up</button>
+                </form>
+                <p class="link">Already subscribed ? <a href="{% url 'auth_app:connexion' %}">Login</a></p>
+            </div>
+        </div>      
+    </div>
+</body>
+</html>
