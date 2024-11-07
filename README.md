@@ -70,7 +70,7 @@ setup.sh
 
    ```bash
    git clone https://github.com/Mael8zinsou/Projet-Django-M1-Semestre-1.git
-   cd Projet-Django-M1-Semestre-1
+   cd Projet-Django-M1-Semestre-1 ou cd Projet-Django-M1-Semestre-1-main
     ```
 
 2. *Créer un environnement virtuel :*
