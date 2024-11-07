@@ -93,7 +93,7 @@ setup.sh
 
 4.  Se déplacer dans le projet :
     ```bash
-    cd Cloud/cloud_projet
+    cd cloud_projet
     ```
 
 5. *Effectuer les migrations :*
