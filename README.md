@@ -105,7 +105,7 @@ setup.sh
 6. *Lancer le projet :*
   Pour démarrer le serveur de développement :
     ```bash
-    python manage.py runserver
+    python manage.py runserver
     ```
  Le projet sera accessible à l'adresse http://127.0.0.1:8000/.
     
