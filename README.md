@@ -69,8 +69,8 @@ setup.sh
 1. *Cloner le dépôt :*
 
    ```bash
-   git clone https://github.com/Mael8zinsou/Projet-Django-M1-Semestre-1.git
-   cd Projet-Django-M1-Semestre-1 ou cd Projet-Django-M1-Semestre-1-main
+   git clone https://github.com/Mael8zinsou/Cloud-File-manager-Django.git
+   cd Cloud-File-manager-Django ou cd Cloud-File-manager-Django-main
     ```
 
 2. *Créer un environnement virtuel :*
