@@ -135,7 +135,7 @@ setup.sh
 
 ## <span style="color:green">Points Importants</span>
 
-- On ne copier un dossier que si il n'est pas vide.
+- On ne copier un dossier que si il n'est pas vide. ( Donc créer 2 dossiers qui ont le même parent avant de copier l'un dans l'autre tout en s'assurant que le dossier n'est pas vide )
 - Les types de fichiers pouvant être visualisés sont les suivants : `.png`, `.jpg`, `.jpeg`,
     `.gif`, `.bmp`, `.txt`,
     `.pdf`, `.html`, `.htm`,
